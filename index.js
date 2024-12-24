@@ -2,7 +2,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
-const roomManager = require("./services/roomManager");
+const roomManager = require("./roomManager");
 
 const app = express();
 app.use(cors({
@@ -22,19 +22,22 @@ io.on('connection', (socket) => {
     console.log('New client connected:', socket.id);
 
     // Create a new room and send back the room ID
-    socket.on('create-room', () => {
-        const roomId = roomManager.createRoom(socket.id);
-        socket.emit('room-created', { roomId });
+    socket.on('create-room', ({userId},callback) => {
+        const roomId = roomManager.createRoom(userId);
+        callback(roomId);
+        // socket.emit('room-created', { roomId });
     });
 
     // Join an existing room
-    socket.on('join-room', ({ roomId }) => {
+    socket.on('join-room', ({ roomId },callback) => {
+        console.log('Rooms:',roomManager.rooms)
         if (roomManager.rooms.has(roomId)) {
             roomManager.joinRoom(roomId, socket.id);
             socket.join(roomId);
             io.to(roomId).emit('user-joined', { userId: socket.id, roomId });
+            callback({ success: true, roomId });
         } else {
-            socket.emit('error', { message: "Room does not exist" });
+            callback({ success: false, message: "Room does not exist" });
         }
     });
 

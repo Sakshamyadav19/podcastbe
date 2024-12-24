@@ -9,15 +9,17 @@ class RoomManager {
     createRoom(creatorSocketId) {
         const roomId = uuidv4();
         this.rooms.set(roomId, [creatorSocketId]);
-        console.log(`Room ${roomId} created`);
+        console.log(`Room ${roomId} created`,this.rooms);
         return roomId;
     }
 
     // Add a user to a room
     joinRoom(roomId, socketId) {
+        console.log(this.rooms)
         if (this.rooms.has(roomId)) {
             this.rooms.get(roomId).push(socketId);
             console.log(`Socket ${socketId} joined room ${roomId}`);
+            
         } else {
             console.log(`Room ${roomId} does not exist`);
         }
