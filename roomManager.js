@@ -15,10 +15,9 @@ class RoomManager {
 
     // Add a user to a room
     joinRoom(roomId, socketId) {
-        console.log(this.rooms)
         if (this.rooms.has(roomId)) {
             this.rooms.get(roomId).push(socketId);
-            console.log(`Socket ${socketId} joined room ${roomId}`);
+            console.log(this.rooms)
             
         } else {
             console.log(`Room ${roomId} does not exist`);

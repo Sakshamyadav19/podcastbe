@@ -24,8 +24,11 @@ io.on('connection', (socket) => {
     // Create a new room and send back the room ID
     socket.on('create-room', ({userId},callback) => {
         const roomId = roomManager.createRoom(userId);
+        socket.join(roomId);
+        const usersInRoom = roomManager.rooms.get(roomId);
+        // io.to(roomId).emit('get-users', usersInRoom);
         callback(roomId);
-        // socket.emit('room-created', { roomId });
+        socket.emit('room-created', { roomId });
     });
 
     // Join an existing room
@@ -35,6 +38,9 @@ io.on('connection', (socket) => {
             roomManager.joinRoom(roomId, socket.id);
             socket.join(roomId);
             io.to(roomId).emit('user-joined', { userId: socket.id, roomId });
+            const usersInRoom = roomManager.rooms.get(roomId);
+            console.log('users: ',usersInRoom)
+            io.to(roomId).emit('get-users', usersInRoom);
             callback({ success: true, roomId });
         } else {
             callback({ success: false, message: "Room does not exist" });
@@ -45,7 +51,9 @@ io.on('connection', (socket) => {
     socket.on('leave-room', ({ roomId }) => {
         roomManager.leaveRoom(roomId, socket.id);
         socket.leave(roomId);
-        io.to(roomId).emit('user-left', { userId: socket.id });
+        // io.to(roomId).emit('user-left', { userId: socket.id });
+        const usersInRoom = roomManager.rooms.get(roomId);
+        io.to(roomId).emit('get-users', usersInRoom);
         roomManager.deleteRoomIfEmpty(roomId);
     });
 
